@@ -1,0 +1,19 @@
+#Global
+.env
+.idea/
+.vscode/
+
+#Django
+
+__pycache__/
+*.pyc
+.venv/
+
+db.sqlite3
+
+media/
+
+# react node
+
+node_modules/
+dist/
