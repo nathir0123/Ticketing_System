@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+from decouple import config
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m&m7fs-(s%pi!-ahdqdpv*tuvsp-ckwls8gii#9sir@@f0z(7q'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'tickets.apps.TicketingSystemConfig',
 
+    'cloudinary',
+    'cloudinary_storage',
 
 ]
 
@@ -124,3 +126,16 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Cloudinary config
+CLOUDINARY_CLOUD_NAME=config('CLOUDINARY_CLOUD_NAME')
+CLOUDINARY_API_KEY=config('CLOUDINARY_API_KEY')
+CLOUDINARY_API_SECRET=config('CLOUDINARY_API_SECRET')
+
+# Cloudinary storage
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+# Media config
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
