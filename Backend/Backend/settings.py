@@ -9,6 +9,8 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
+from datetime import timedelta
+
 from decouple import config
 from pathlib import Path
 
@@ -126,7 +128,20 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.SessionAuthentication',
 
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIKETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIKETIME": timedelta(days=1),
+    "AUTH_HEADER_TYPES":("Bearer",),
+}
 # Cloudinary config
 CLOUDINARY_CLOUD_NAME=config('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY=config('CLOUDINARY_API_KEY')
