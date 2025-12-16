@@ -1,8 +1,10 @@
 from rest_framework import generics, permissions
+from rest_framework.exceptions import ValidationError
+from .models import Ticket
+from .permissions import IsStaffOrReadOnly
+from .serializers import TicketCreateSerializer,TicketStatusSerializer
+from .services import create_ticket, change_ticket_status
 
-from tickets.models import Ticket
-from tickets.serializers import TicketCreateSerializer
-from tickets.services import create_ticket
 class TicketCreateAPIView(generics.CreateAPIView):
     serializer_class = TicketCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -16,6 +18,26 @@ class TicketCreateAPIView(generics.CreateAPIView):
 
         )
 
-   #  def get_queryset(self):
-   #      return Ticket.objects.filter(created_by=self.request.user)
-   #
+
+
+
+
+class TicketStatusUpdateAPIView(generics.UpdateAPIView):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketStatusSerializer
+    permission_classes = [IsStaffOrReadOnly]
+    http_method_names = ['patch']
+
+    def perform_update(self, serializer):
+        ticket = self.get_object()
+        new_status = serializer.validated_data['status']
+
+        try:
+            change_ticket_status(
+                ticket=ticket,
+                new_status=new_status
+            )
+        except Exception as e:
+            raise ValidationError({'status': str(e)})
+
+        serializer.save()

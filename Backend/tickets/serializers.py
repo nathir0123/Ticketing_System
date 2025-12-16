@@ -10,3 +10,10 @@ class TicketListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ticket
         fields = ('id','title', 'description','category','status','created_at','attachment')
+
+
+class TicketStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ticket
+        fields = ('status',)
+
