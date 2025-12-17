@@ -1,3 +1,4 @@
+from cloudinary.models import CloudinaryField
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -25,8 +26,10 @@ class Ticket(models.Model):
         default="NEW",
 
     )
-    attachment = models.FileField(
-        upload_to='attachments/',
+    attachment = CloudinaryField(
+        'attachment',
+        resource_type="auto",
+        folder='tickets/',
         null=True,
         blank=True,
     )

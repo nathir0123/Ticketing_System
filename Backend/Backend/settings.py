@@ -10,7 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 from datetime import timedelta
-
+import cloudinary
+import cloudinary.api
+import cloudinary.uploader
 from decouple import config
 from pathlib import Path
 
@@ -59,7 +61,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CORS_ALLOW_ORIGINS = [
-'http://localhost:5173/',
+    'http://127.0.0.1:5173',
+    'http://localhost:5173/',
 ]
 ROOT_URLCONF = 'Backend.urls'
 
@@ -138,14 +141,20 @@ REST_FRAMEWORK = {
     ),
 }
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIKETIME": timedelta(minutes=30),
-    "REFRESH_TOKEN_LIKETIME": timedelta(days=1),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES":("Bearer",),
 }
 # Cloudinary config
 CLOUDINARY_CLOUD_NAME=config('CLOUDINARY_CLOUD_NAME')
 CLOUDINARY_API_KEY=config('CLOUDINARY_API_KEY')
 CLOUDINARY_API_SECRET=config('CLOUDINARY_API_SECRET')
+cloudinary.config(
+    cloud_name = CLOUDINARY_CLOUD_NAME,
+    api_key=CLOUDINARY_API_KEY,
+    api_secret=CLOUDINARY_API_SECRET,
+    secure=True,
+)
 
 # Cloudinary storage
 

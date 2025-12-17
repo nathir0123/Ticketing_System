@@ -1,22 +1,35 @@
-from rest_framework import generics, permissions
+from django.contrib.auth.models import User
+from rest_framework import generics, permissions, filters
+from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
 from .models import Ticket
 from .permissions import IsStaffOrReadOnly
-from .serializers import TicketCreateSerializer,TicketStatusSerializer
-from .services import create_ticket, change_ticket_status
+from .serializers import TicketCreateSerializer,TicketStatusSerializer,TicketListSerializer,RegisterSerializer
+from .services import change_ticket_status
+from django_filters.rest_framework import DjangoFilterBackend
 
-class TicketCreateAPIView(generics.CreateAPIView):
-    serializer_class = TicketCreateSerializer
+class TicketListCreateAPIView(generics.ListCreateAPIView):
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return TicketCreateSerializer
+        return TicketListSerializer
+
     permission_classes = [permissions.IsAuthenticated]
+    queryset = Ticket.objects.all()
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['title', 'category']
+    search_fields = ['title', 'created_by__username']
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+            return Ticket.objects.all().order_by('-created_at')
+        return Ticket.objects.filter(created_by=user).order_by('-created_at')
 
     def perform_create(self, serializer):
-        create_ticket(
-            user=self.request.user,
-            title=serializer.validated_data['title'],
-            description=serializer.validated_data['description'],
-            category=serializer.validated_data['category'],
 
-        )
+        if self.request.user.is_staff:
+            raise ValidationError({'status': "You can't create tickets"})
+        serializer.save(created_by=self.request.user)
 
 
 
@@ -41,3 +54,20 @@ class TicketStatusUpdateAPIView(generics.UpdateAPIView):
             raise ValidationError({'status': str(e)})
 
         serializer.save()
+
+
+class TicketDetailAPIView(generics.RetrieveUpdateAPIView):
+    queryset = Ticket.objects.all()
+    serializer_class = TicketListSerializer
+    permission_classes = [permissions.IsAuthenticated]
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff:
+             return Ticket.objects.all()
+        return Ticket.objects.filter(created_by=user)
+
+
+class RegisterAPIView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
+    permission_classes = [AllowAny]
