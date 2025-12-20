@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {useNavigate,Link} from 'react-router-dom';
 import api from  '../api/axios';
+import { jwtDecode } from 'jwt-decode';
 
 const Login =() => {
     const [username, setUsername] = useState('');
@@ -14,7 +15,9 @@ const Login =() => {
             const response = await api.post('auth/login/', {username,password});
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh)
-            navigate ('.dashboard');
+            const decoded = jwtDecode(response.data.access)
+            localStorage.setItem('is_staff', decoded.is_staff ? 'true' : 'false');
+            navigate ('/dashboard');
         }catch(err){
             console.error("Login Error", err)
             setError('Invalid username or password');

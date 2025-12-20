@@ -1,13 +1,27 @@
-import api from './axios'
+import { jwtDecode } from "jwt-decode";
 
-export const loginUser = async (username, password) => {
-    try {
-        const response = await api.post('auth/login/', { username , password});
-        localStorage.setItem('access_token', response.data.access);
-        localStorage.setItem('refresh_token', response.data.refresh);
-        return response.data;
-    }catch(error){
-        throw error.response.data;
+export const getUserInfo = () => {
+  const token = localStorage.getItem("access_token");
 
-    }
+  if (!token) {
+    return {
+      isStaff: false,
+      isAuthenticated: false,
+    };
+  }
+
+  try {
+    const decoded = jwtDecode(token);
+    return {
+      isStaff: decoded.is_staff,
+      userId: decoded.user_id,
+      isAuthenticated: true,
+    };
+  } catch (err) {
+    console.error(err)
+    return {
+      isStaff: false,
+      isAuthenticated: false,
+    };
+  }
 };

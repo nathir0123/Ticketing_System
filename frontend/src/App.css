@@ -40,3 +40,28 @@
 .read-the-docs {
   color: #888;
 }
+/* This targets the specific class we will add to the modal */
+/* Custom Scrollbar Styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px; /* Very thin */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Makes the track invisible */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #004d55; /* Your theme teal */
+  border-radius: 20px; /* Fully rounded ends */
+  border: 2px solid transparent; /* Gives it a bit of padding */
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #00363b; /* Darker teal on hover */
+}
+
+/* For Firefox */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #004d55 transparent;
+}

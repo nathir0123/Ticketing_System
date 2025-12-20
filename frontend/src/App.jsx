@@ -2,8 +2,8 @@ import {BrowserRouter as Router,Routes,Route} from 'react-router-dom';
 import Login from './components/Login'
 import Register from './components/Register';
 import ProtectedRoute from './components/ProtectedRoute';
+import Dashboard from './components/Dashboard';
 
-const Dashboard = () => <div className="P-8 text-2xl font-bold">Welcome to the Dashboard! </div>
 
 function App() {
   
@@ -19,7 +19,7 @@ function App() {
           </ProtectedRoute>
         }
         />
-        <Route path="/" element={<Login />}/>
+        <Route path="/" element={<Login/>}/>
       </Routes>
     </Router>  
   );

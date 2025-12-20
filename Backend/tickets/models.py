@@ -28,7 +28,7 @@ class Ticket(models.Model):
     )
     attachment = CloudinaryField(
         'attachment',
-        resource_type="auto",
+        resource_type="raw",
         folder='tickets/',
         null=True,
         blank=True,
@@ -42,4 +42,25 @@ class Ticket(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.status}"
+
+
+class TicketStatusHistory(models.Model):
+        ticket = models.ForeignKey(
+            Ticket,
+            on_delete=models.CASCADE,
+            related_name="ticket_history",
+
+        )
+        old_status = models.CharField(max_length=10)
+        new_status = models.CharField(max_length=10)
+        changed_by = models.ForeignKey(
+            User,
+            on_delete=models.SET_NULL,
+            null=True,
+            blank=True,
+        )
+        created_at = models.DateTimeField(auto_now_add=True)
+
+        def __str__(self):
+            return f"{self.ticket.id}: {self.old_status} -> {self.new_status}"
 
