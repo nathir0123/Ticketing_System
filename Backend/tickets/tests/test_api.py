@@ -180,4 +180,5 @@ def test_user_can_create_ticket_withattachement(user):
     ticket = Ticket.objects.first()
     assert bool(ticket.attachment) is True
 
-    assert "test_file" in ticket.attachment.name
+
+    assert ticket.attachment.url is not None

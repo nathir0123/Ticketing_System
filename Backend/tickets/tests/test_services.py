@@ -25,7 +25,7 @@ def test_ticket_can_move_from_new_to_review(user):
         category="TECH",
 
     )
-    change_ticket_status(ticket=ticket, new_status="REVIEW")
+    change_ticket_status(ticket=ticket, new_status="REVIEW",changed_by=user)
     assert ticket.status == "REVIEW"
 # @pytest.mark.django_db
 # def test_ticket_cannot_skip_status(user):

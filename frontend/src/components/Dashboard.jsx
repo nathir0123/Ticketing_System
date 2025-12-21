@@ -7,6 +7,7 @@ import CreateTicketModal from './CreateTicketModal';
 import Sidebar from '../components/Sidebar';
 
 const Dashboard = () => {
+  // --- 1. STATE ---
   const [tickets, setTickets] = useState([]);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -16,12 +17,11 @@ const Dashboard = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
 
-  // PAGINATION STATE
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 10;
 
-  // Memoize staff status so it only recalculates if the token changes
+  // --- 2. ROLE DETECTION ---
   const isStaff = useMemo(() => {
     const token = localStorage.getItem("access_token");
     if (!token) return false;
@@ -34,7 +34,26 @@ const Dashboard = () => {
     }
   }, []);
 
-  // FETCH TICKETS - Logic is now stable
+  // --- 3. TAWK.TO CHAT CONTROL ---
+  useEffect(() => {
+    const toggleChat = () => {
+      if (window.Tawk_API && typeof window.Tawk_API.hideWidget === 'function') {
+        if (isCreateOpen || selectedTicket) {
+          window.Tawk_API.hideWidget();
+        } else {
+          window.Tawk_API.showWidget();
+        }
+      }
+    };
+
+    toggleChat();
+
+    if (window.Tawk_API) {
+      window.Tawk_API.onLoad = toggleChat;
+    }
+  }, [isCreateOpen, selectedTicket]);
+
+  // --- 4. DATA FETCHING ---
   const fetchTickets = useCallback(async (pageNumber) => {
     setLoading(true);
     try {
@@ -43,7 +62,7 @@ const Dashboard = () => {
           search, 
           status: statusFilter, 
           category: categoryFilter,
-          page: pageNumber // Uses the argument passed to it
+          page: pageNumber 
         }
       });
       
@@ -59,20 +78,16 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-    // Note: 'page' is removed from dependencies to keep the function stable
   }, [search, statusFilter, categoryFilter]);
 
-  // Handle Search & Filter Resets (The effect that gave you the warning)
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       setPage(1); 
       fetchTickets(1); 
     }, 400);
-
     return () => clearTimeout(delayDebounce);
-  }, [search, statusFilter, categoryFilter, fetchTickets]); // fetchTickets is now a safe dependency
+  }, [search, statusFilter, categoryFilter, fetchTickets]);
 
-  // Change Page Handler
   const handlePageChange = (newPage) => {
     setPage(newPage);
     fetchTickets(newPage);
@@ -81,45 +96,54 @@ const Dashboard = () => {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
+  // --- 5. RENDER ---
   return (
-    <div className="flex min-h-screen bg-gray-50 font-sans">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 font-sans">
       <Sidebar />
 
-      <div className={`flex-1 p-8 transition-all duration-300 ${(isCreateOpen || selectedTicket) ? 'blur-sm pointer-events-none scale-[0.99]' : ''}`}>
+      {/* IMPORTANT: This container only wraps the background content. 
+          When a modal is open, we blur THIS div and disable clicks on it.
+      */}
+      <div className={`flex-1 p-4 md:p-8 transition-all duration-500 ${
+        (isCreateOpen || selectedTicket) ? 'pointer-events-none ' : ''
+      }`}>
         <div className="max-w-6xl mx-auto">
           
-          <div className="flex justify-between items-center mb-8">
+          {/* HEADER */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-black text-[#004d55]">{isStaff ? 'Admin Panel' : 'Support Center'}</h1>
-              <p className="text-gray-400 text-sm font-medium italic">Manage requests efficiently</p>
+              <h1 className="text-2xl md:text-3xl font-black text-[#004d55] tracking-tight">
+                {isStaff ? 'Admin Panel' : 'Support Center'}
+              </h1>
+              <p className="text-gray-400 text-xs md:text-sm font-medium italic">Manage requests efficiently</p>
             </div>
             {!isStaff && (
               <button 
                 onClick={() => setIsCreateOpen(true)} 
-                className="bg-[#004d55] text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-teal-900/20 hover:bg-[#003a40] transition-all active:scale-95"
+                className="w-full sm:w-auto bg-[#004d55] text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-teal-900/20 hover:bg-[#003a40] transition-all active:scale-95 text-sm"
               >
                 + New Ticket
               </button>
             )}
           </div>
 
-          {/* FILTERS SECTION */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="relative flex-1">
+          {/* FILTERS */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <div className="relative col-span-1 sm:col-span-2 lg:col-span-2">
                <input 
                 type="text" 
                 placeholder="Search by title..." 
-                className="w-full p-3 pl-10 rounded-xl border border-gray-100 bg-white focus:border-[#004d55] outline-none transition-all shadow-sm" 
+                className="w-full p-3.5 pl-10 rounded-xl border border-gray-100 bg-white focus:border-[#004d55] outline-none transition-all shadow-sm text-sm" 
                 value={search} 
                 onChange={(e) => setSearch(e.target.value)} 
               />
-              <svg className="absolute left-3 top-3.5 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="absolute left-3 top-4 h-4 w-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
             
             <select 
-              className="p-3 rounded-xl border border-gray-100 bg-white font-medium text-gray-600 outline-none shadow-sm cursor-pointer" 
+              className="w-full p-3.5 rounded-xl border border-gray-100 bg-white font-medium text-gray-600 outline-none shadow-sm text-sm cursor-pointer" 
               value={statusFilter} 
               onChange={(e) => setStatusFilter(e.target.value)}
             >
@@ -130,7 +154,7 @@ const Dashboard = () => {
             </select>
 
             <select 
-              className="p-3 rounded-xl border border-gray-100 bg-white font-medium text-gray-600 outline-none shadow-sm cursor-pointer" 
+              className="w-full p-3.5 rounded-xl border border-gray-100 bg-white font-medium text-gray-600 outline-none shadow-sm text-sm cursor-pointer" 
               value={categoryFilter} 
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
@@ -141,12 +165,17 @@ const Dashboard = () => {
             </select>
           </div>
 
-          <TicketTable tickets={tickets} loading={loading} isStaff={isStaff} onSelect={setSelectedTicket} />
+          <TicketTable 
+            tickets={tickets} 
+            loading={loading} 
+            isStaff={isStaff} 
+            onSelect={setSelectedTicket} 
+          />
 
-          {/* PAGINATION UI */}
+          {/* PAGINATION */}
           {!loading && totalPages > 1 && (
-            <div className="flex items-center justify-between mt-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 animate-in fade-in slide-in-from-bottom-2">
-              <span className="text-xs text-gray-400 font-bold uppercase tracking-widest">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-8 bg-white p-4 rounded-2xl shadow-sm border border-gray-100 gap-4">
+              <span className="text-[10px] text-gray-400 font-black uppercase tracking-widest text-center">
                 Showing <span className="text-[#004d55]">{tickets.length}</span> of {totalCount} TICKETS
               </span>
               
@@ -154,23 +183,23 @@ const Dashboard = () => {
                 <button 
                   disabled={page === 1}
                   onClick={() => handlePageChange(page - 1)}
-                  className="p-2 rounded-lg border border-gray-100 disabled:opacity-20 hover:bg-gray-50 text-[#004d55] transition-all"
+                  className="p-2 rounded-lg border border-gray-100 disabled:opacity-20 text-[#004d55]"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
 
-                <div className="bg-gray-50 px-4 py-2 rounded-xl text-xs font-black text-[#004d55] border border-gray-100">
+                <div className="bg-gray-50 px-4 py-2 rounded-xl text-xs font-black text-[#004d55]">
                   {page} / {totalPages}
                 </div>
 
                 <button 
                   disabled={page === totalPages}
                   onClick={() => handlePageChange(page + 1)}
-                  className="p-2 rounded-lg border border-gray-100 disabled:opacity-20 hover:bg-gray-50 text-[#004d55] transition-all"
+                  className="p-2 rounded-lg border border-gray-100 disabled:opacity-20 text-[#004d55]"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
@@ -180,21 +209,26 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* MODALS */}
-      {selectedTicket && (
-        <TicketDetailModal 
-          ticket={selectedTicket} 
-          isStaff={isStaff} 
-          onClose={() => setSelectedTicket(null)} 
-          refresh={() => fetchTickets(page)} 
-        />
-      )}
-      {isCreateOpen && (
-        <CreateTicketModal 
-          onClose={() => setIsCreateOpen(false)} 
-          refresh={() => fetchTickets(1)} 
-        />
-      )}
+      {/* MODALS ARE PLACED HERE (Outside the blurred div)
+          We use z-[999] to ensure they are on top of everything.
+      */}
+      <div className="relative z-[999]">
+        {selectedTicket && (
+          <TicketDetailModal 
+            ticket={selectedTicket} 
+            isStaff={isStaff} 
+            onClose={() => setSelectedTicket(null)} 
+            refresh={() => fetchTickets(page)} 
+          />
+        )}
+        
+        {isCreateOpen && (
+          <CreateTicketModal 
+            onClose={() => setIsCreateOpen(false)} 
+            refresh={() => fetchTickets(1)} 
+          />
+        )}
+      </div>
     </div>
   );
 };

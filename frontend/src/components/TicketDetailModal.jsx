@@ -13,7 +13,6 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
 
   const fileType = getFileType(ticket.attachment);
 
-  // Handle status update (staff only)
   const handleStatusUpdate = async (newStatus) => {
     try {
       await api.patch(`tickets/${ticket.id}/status/`, { status: newStatus });
@@ -25,67 +24,71 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 text-left">
-      <div className="bg-white rounded-3xl w-full max-w-2xl relative shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60  p-0 sm:p-4">
+      {/* Mobile: Slides from bottom, full width.
+         Desktop: Centered, max-width-2xl.
+      */}
+      <div className="bg-white rounded-t-[32px] sm:rounded-[32px] w-full max-w-2xl relative shadow-2xl max-h-[95vh] flex flex-col overflow-hidden animate-in slide-in-from-bottom duration-300">
 
-        {/* ---------- HEADER (FIXED) ---------- */}
-        <div className="p-8 pb-4">
+        {/* ---------- HEADER ---------- */}
+        <div className="p-6 sm:p-8 pb-4">
           <button
             onClick={onClose}
-            className="absolute right-6 top-6 text-2xl font-bold text-gray-400 hover:text-red-500 transition-colors"
+            className="absolute right-6 top-6 p-2 text-gray-400 hover:text-red-500 transition-colors"
           >
-            &times;
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
 
-          <h2 className="text-2xl font-black text-gray-800 mb-2">
+          <h2 className="text-xl sm:text-2xl font-black text-[#004d55] mb-2 pr-8 leading-tight">
             {ticket.title}
           </h2>
 
-          <div className="flex gap-2">
-            <span className="text-[10px] font-black uppercase px-2 py-1 bg-teal-50 text-[#004d55] rounded-md border border-teal-100">
+          <div className="flex flex-wrap gap-2">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase px-2 py-1 bg-teal-50 text-[#004d55] rounded-md border border-teal-100/50">
               {ticket.category || 'General'}
             </span>
-            <span className="text-[10px] font-black uppercase px-2 py-1 bg-gray-100 text-gray-500 rounded-md">
+            <span className="text-[9px] sm:text-[10px] font-black uppercase px-2 py-1 bg-gray-100 text-gray-400 rounded-md">
               ID: #{ticket.id}
             </span>
           </div>
         </div>
 
-        {/* ---------- SCROLLABLE CONTENT ---------- */}
-        <div className="px-8 pb-6 overflow-y-auto flex-1 pr-6 custom-scrollbar">
+        {/* ---------- SCROLLABLE BODY ---------- */}
+        <div className="px-6 sm:px-8 pb-6 overflow-y-auto flex-1 custom-scrollbar">
 
           {/* Issue Description */}
-          <div className="bg-gray-50 p-6 rounded-2xl mb-8 border border-gray-100 leading-relaxed text-gray-700">
-            <p className="text-xs font-black text-gray-400 uppercase mb-2">
+          <div className="bg-gray-50 p-5 sm:p-6 rounded-2xl mb-6 border border-gray-100">
+            <p className="text-[10px] font-black text-gray-300 uppercase mb-2 tracking-widest">
               Issue Description
             </p>
-            <p className="whitespace-pre-wrap">
+            <p className="whitespace-pre-wrap text-sm sm:text-base text-gray-700 leading-relaxed">
               {ticket.description}
             </p>
           </div>
 
-          {/* Attachment Preview */}
+          {/* Attachment Preview (Responsive Height) */}
           {ticket.attachment && (
-            <div className="mb-8">
-              <p className="text-xs font-black text-gray-400 uppercase mb-3">
+            <div className="mb-6">
+              <p className="text-[10px] font-black text-gray-300 uppercase mb-3 tracking-widest">
                 Attachment Preview
               </p>
 
               <div className="border rounded-2xl overflow-hidden bg-gray-100 shadow-inner">
-
                 {fileType === 'image' && (
                   <img
                     src={ticket.attachment}
                     alt="preview"
-                    className="w-full h-auto max-h-80 object-contain bg-white"
+                    className="w-full h-auto max-h-64 sm:max-h-80 object-contain bg-white"
                   />
                 )}
 
                 {fileType === 'pdf' && (
-                  <div className="w-full h-96">
+                  <div className="w-full h-64 sm:h-96">
                     <iframe
-                      src={`${ticket.attachment}#toolbar=0`}
-                      className="w-full h-full"
+                      src={`${ticket.attachment}#view=FitH`}
+                      className="w-full h-full border-none"
                       title="PDF Preview"
                     />
                   </div>
@@ -93,29 +96,28 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
 
                 {fileType === 'other' && (
                   <div className="p-8 text-center bg-white">
-                    <p className="text-sm text-gray-500 mb-4 font-medium">
-                      Preview not available for this file type.
+                    <p className="text-xs text-gray-400 mb-4 font-bold">
+                      Preview not supported on mobile.
                     </p>
                     <a
                       href={ticket.attachment}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-block bg-[#004d55] text-white px-6 py-2 rounded-xl font-bold text-sm hover:bg-[#00363b] transition-all"
+                      className="inline-block bg-[#004d55] text-white px-6 py-3 rounded-xl font-bold text-xs"
                     >
-                      Download / View File
+                      Download File
                     </a>
                   </div>
                 )}
               </div>
-
               <div className="mt-2 text-right">
                 <a
                   href={ticket.attachment}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs font-bold text-[#004d55] hover:underline"
+                  className="text-[10px] font-black text-[#004d55] hover:underline uppercase tracking-tighter"
                 >
-                  Open in New Tab ↗
+                  Open Original ↗
                 </a>
               </div>
             </div>
@@ -123,50 +125,36 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
 
           {/* Activity History */}
           <div className="mb-4">
-            <p className="text-xs font-black text-gray-400 uppercase mb-4 tracking-wider">
+            <p className="text-[10px] font-black text-gray-300 uppercase mb-4 tracking-widest">
               Activity History
             </p>
 
             <div className="space-y-4">
-              {ticket.status_history && ticket.status_history.length > 0 ? (
+              {ticket.status_history?.length > 0 ? (
                 ticket.status_history.map((log, index) => (
-                  <div
-                    key={index}
-                    className="flex gap-4 items-start border-l-2 border-teal-100 pl-4 relative"
-                  >
+                  <div key={index} className="flex gap-4 items-start border-l-2 border-teal-50 pl-4 relative">
                     <div className="absolute -left-[9px] top-1 w-4 h-4 rounded-full bg-teal-500 border-4 border-white shadow-sm"></div>
-
-                    <div className="text-sm">
-                      <p className="text-gray-800 font-medium">
-                        Changed to{' '}
-                        <span className="font-bold text-[#004d55]">
-                          {log.new_status}
-                        </span>
+                    <div className="text-xs">
+                      <p className="text-gray-700 font-bold">
+                        Status → <span className="text-[#004d55]">{log.new_status}</span>
                       </p>
-                      <p className="text-[11px] text-gray-400 mt-1">
-                        By{' '}
-                        <span className="font-bold text-gray-600">
-                          {log.changed_by || 'Admin'}
-                        </span>
-                        <span className="mx-1">•</span>
-                        {new Date(log.created_at).toLocaleString()}
+                      <p className="text-[10px] text-gray-400 mt-0.5">
+                        {log.changed_by || 'Admin'} • {new Date(log.created_at).toLocaleDateString()}
                       </p>
                     </div>
                   </div>
                 ))
               ) : (
-                <p className="text-xs text-gray-400 italic text-center py-2">
-                  No activity logs yet.
-                </p>
+                <p className="text-[10px] text-gray-300 italic text-center py-2">No activity logs recorded.</p>
               )}
             </div>
           </div>
         </div>
 
-        {/* ---------- FOOTER (STICKY) ---------- */}
-        <div className="p-6 bg-gray-50 border-t border-gray-100 rounded-b-3xl">
-          <p className="text-xs font-black text-gray-400 uppercase mb-4">
-            Ticket Actions
+        {/* ---------- STICKY FOOTER ---------- */}
+        <div className="p-6 bg-white border-t border-gray-100 rounded-b-[32px]">
+          <p className="text-[10px] font-black text-gray-300 uppercase mb-3 tracking-widest">
+            {isStaff ? "Update Ticket Status" : "Current Status"}
           </p>
 
           {isStaff ? (
@@ -176,10 +164,10 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
                   key={status}
                   disabled={ticket.status === status}
                   onClick={() => handleStatusUpdate(status)}
-                  className={`flex-1 py-3 rounded-xl text-xs font-black transition-all ${
+                  className={`flex-1 py-3.5 rounded-xl text-[10px] font-black transition-all ${
                     ticket.status === status
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed border'
-                      : 'bg-[#004d55] text-white hover:bg-[#00363b] shadow-md active:scale-95'
+                      ? 'bg-gray-50 text-gray-300 border border-gray-100 cursor-not-allowed'
+                      : 'bg-[#004d55] text-white hover:bg-[#00363b] shadow-lg active:scale-95'
                   }`}
                 >
                   {status}
@@ -187,17 +175,14 @@ const TicketDetailModal = ({ ticket, isStaff, onClose, refresh }) => {
               ))}
             </div>
           ) : (
-            <div className="flex items-center justify-between bg-white p-4 rounded-2xl border border-gray-100">
-              <span className="text-sm font-bold text-gray-500">
-                Current Status:
-              </span>
-              <span className="px-4 py-1 bg-teal-50 text-[#004d55] rounded-lg font-black text-[10px] uppercase border border-teal-100">
+            <div className="flex items-center justify-between bg-gray-50 p-4 rounded-2xl border border-gray-100">
+              <span className="text-xs font-bold text-gray-400">Status:</span>
+              <span className="px-3 py-1 bg-[#004d55] text-white rounded-lg font-black text-[10px] uppercase">
                 {ticket.status}
               </span>
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
