@@ -52,10 +52,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1:5173',
-    'http://localhost:5173',
-]
+
+
+cors_raw = config('CORS_ALLOWED_ORIGINS', default='http://localhost:5173')
+
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_raw.split(',')]
+
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in cors_raw.split(',')]
+
+
 ROOT_URLCONF = 'Backend.urls'
 
 
