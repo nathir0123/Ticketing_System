@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    { 
+      "source": "/api/(.*)", 
+      "destination": "https://ticketing-system-iskd.onrender.com/api/$1" 
+    },
+    { 
+      "source": "/(.*)", 
+      "destination": "/index.html" 
+    }
+  ]
+}
