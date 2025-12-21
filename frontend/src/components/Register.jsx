@@ -11,12 +11,13 @@ const Register = () =>{
     const [error, setError]= useState('');
     const navigate = useNavigate();
     const handleChange = (e)=>{
-        setFormData({ ...FormData, [e.EventTarget.name]: e.target.value});
+        setFormData({ ...formData, [e.target.name]: e.target.value});
+
     };
     const handleRegister = async (e)=>{
-        e.preventiDefault();
+        e.preventDefault();
         try{
-            await api.post('auth/register/',formData);
+            await api.post('auth/register',formData);
             navigate('/login');
         }catch(err){
             console.error("Registration Error:",err);
