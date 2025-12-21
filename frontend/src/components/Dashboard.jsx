@@ -99,7 +99,7 @@ const Dashboard = () => {
   // --- 5. RENDER ---
   return (
     <div className="flex flex-col md:flex-row min-h-screen bg-gray-50 font-sans">
-      <Sidebar />
+      <Sidebar isStaff={isStaff} />
 
       {/* IMPORTANT: This container only wraps the background content. 
           When a modal is open, we blur THIS div and disable clicks on it.

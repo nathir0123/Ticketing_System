@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-const Sidebar = () => {
-  const [isOpen, setIsOpen] = useState(false); // Controls mobile visibility
+const Sidebar = ({ isStaff }) => { // Added isStaff prop
+  const [isOpen, setIsOpen] = useState(false); 
 
   const handleLogout = () => {
     localStorage.removeItem('access_token');
@@ -11,10 +11,10 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* --- MOBILE TOP BAR (Visible only on Mobile) --- */}
+      {/* --- MOBILE TOP BAR --- */}
       <div className="md:hidden flex items-center justify-between bg-white border-b border-gray-100 p-4 sticky top-0 z-[60] shadow-sm">
         <h1 className="text-xl font-black text-[#004d55] tracking-tight">
-          Support<span className="text-gray-300">Center</span>
+          {isStaff ? 'Admin' : 'Support'}<span className="text-gray-300">{isStaff ? 'Panel' : 'Center'}</span>
         </h1>
         <button 
           onClick={() => setIsOpen(!isOpen)} 
@@ -33,11 +33,14 @@ const Sidebar = () => {
         ${isOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"}
       `}>
         <div className="flex flex-col h-full">
-          {/* Logo Section */}
           <div className="flex-1">
-            <h1 className="hidden md:block text-2xl font-black text-[#004d55] mb-10 px-2 tracking-tight">
-              Support<span className="text-gray-300">Center</span>
+            {/* Desktop Logo Section */}
+            <h1 className="hidden md:block text-2xl font-black text-[#004d55] mb-1 px-2 tracking-tight">
+              {isStaff ? 'Admin' : 'Support'}<span className="text-gray-300">{isStaff ? 'Panel' : 'Center'}</span>
             </h1>
+            <p className="hidden md:block text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] px-2 mb-10">
+               {isStaff ? 'Staff Workspace' : 'User Portal'}
+            </p>
             
             <nav className="space-y-2">
               <button className="flex items-center gap-3 w-full px-4 py-3 bg-teal-50 text-[#004d55] rounded-xl font-bold transition-all border border-teal-100/50">
