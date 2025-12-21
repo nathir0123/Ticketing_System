@@ -180,4 +180,9 @@ CORS_ALLOW_CREDENTIALS = True
 from corsheaders.defaults import default_headers
 CORS_ALLOW_HEADERS = default_headers + (
     "authorization",
+    "content-type",
+    "accept",
+    "origin",
+    "x-requested-with",
 )
+CORS_PREFLIGHT_MAX_AGE = 86400
