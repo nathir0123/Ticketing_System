@@ -24,7 +24,7 @@ const Register = () => {
         
         try {
             // 1. Ensure the endpoint matches your backend (check if it needs a leading slash)
-            const response = await api.post('/auth/register', formData);
+            const response = await api.post('/auth/register/', formData);
             
             // 2. Success check (Axios throws on 4xx/5xx, so if we're here, it worked)
             console.log("Registration Successful:", response.data);
