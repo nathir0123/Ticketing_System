@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../api/axios'; 
+import { jwtDecode } from 'jwt-decode';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -11,6 +12,22 @@ const Register = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false); // Added loading state
     const navigate = useNavigate();
+    useEffect(() =>{
+            const token = localStorage.getItem('access_token');
+            if(token){
+              try{
+                const decoded = jwtDecode(token);
+                const currentTime = Date.now() / 1000;
+                if(decoded.exp > currentTime){
+                navigate('/dashboard', {replace:true});
+                }else
+                  localStorage.clear();
+            }catch(err){
+              console.error("Token Decode Error:", err);
+              localStorage.clear();
+            }
+            }
+        }, [navigate]);
 
     const handleChange = (e) => {
         // Clear errors when the user starts typing again
